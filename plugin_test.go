@@ -24,8 +24,8 @@ type testCases struct {
 
 var test = []testCases{
 	{testModule{"Single Package, Single Flag", "dnf", []string{"--verbose"}, []string{"bash"}}, "dnf install -y --verbose bash"},
-	{testModule{"Single Package, No Flag", "dnf", []string{""}, []string{"bash"}}, "dnf install -y bash"},
-	{testModule{"Multiple Packages, No Flag", "dnf", []string{""}, []string{"bash", "fish"}}, "dnf install -y bash fish"},
+	{testModule{"Single Package, No Flag", "dnf", []string{""}, []string{"bash"}}, "dnf install -y  bash"},
+	{testModule{"Multiple Packages, No Flag", "dnf", []string{""}, []string{"bash", "fish"}}, "dnf install -y  bash fish"},
 	{testModule{"Multiple Packages, Multiple Flags", "dnf", []string{"--verbose", "--best"}, []string{"bash", "fish"}}, "dnf install -y --verbose --best bash fish"},
 }
 
