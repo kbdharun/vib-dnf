@@ -1,4 +1,4 @@
-module github.com/<username>/<pluginname> // remember to change this according to your needs!
+module github.com/kbdharun/vib-dnf
 
 
 go 1.21
