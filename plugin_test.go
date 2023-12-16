@@ -2,9 +2,6 @@
 // Copyright 2023 - present, K.B.Dharun Krishna <mail@kbdharun.dev>
 // SPDX-License-Identifier: GPL-3.0-ONLY
 
-// Copyright 2023 - 2023, axtlos <axtlos@disroot.org>
-// SPDX-License-Identifier: GPL-3.0-ONLY
-
 package main
 
 import (
@@ -26,10 +23,10 @@ type testCases struct {
 }
 
 var test = []testCases{
-	{testModule{"Single Package, Single Flag", "dnf", []string{"--verbose"}, []string{"bash"}}, "dnf install -y --verbose bash"},
-	{testModule{"Single Package, No Flag", "dnf", []string{""}, []string{"bash"}}, "dnf install -y bash"},
-	{testModule{"Multiple Packages, No Flag", "dnf", []string{""}, []string{"bash", "fish"}}, "dnf install -y bash fish"},
-	{testModule{"Multiple Packages, Multiple Flags", "dnf", []string{"--verbose", "-y"}, []string{"bash", "fish"}}, "dnf install -y --verbose bash fish"},
+	{testModule{"Single Package, Single Flag", "dnf", []string{"--verbose"}, []string{"bash"}}, "dnf install --verbose bash"},
+	{testModule{"Single Package, No Flag", "dnf", []string{""}, []string{"bash"}}, "dnf install bash"},
+	{testModule{"Multiple Packages, No Flag", "dnf", []string{""}, []string{"bash", "fish"}}, "dnf install bash fish"},
+	{testModule{"Multiple Packages, Multiple Flags", "dnf", []string{"--verbose", "-y"}, []string{"bash", "fish"}}, "dnf install --verbose -y bash fish"},
 }
 
 func TestBuildModule(t *testing.T) {
