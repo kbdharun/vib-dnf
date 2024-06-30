@@ -5,29 +5,78 @@
 package main
 
 import (
+	"C"
+	"bufio"
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/vanilla-os/vib/api"
 )
 
 type DnfModule struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-
-	ExtraFlags []string
-	Packages   []string
+	Name    string     `json:"name"`
+	Type    string     `json:"type"`
+	Options DnfOptions `json:"options"`
+	Source  api.Source `json:"source"`
 }
 
-func BuildModule(moduleInterface interface{}, _ *api.Recipe) (string, error) {
-	var module DnfModule
-	err := mapstructure.Decode(moduleInterface, &module)
+type DnfOptions struct {
+	ExtraFlags []string `json:"extra_flags"`
+}
+
+//export BuildModule
+func BuildModule(moduleInterface *C.char, recipeInterface *C.char) *C.char {
+	var module *DnfModule
+	var recipe *api.Recipe
+
+	err := json.Unmarshal([]byte(C.GoString(moduleInterface)), &module)
 	if err != nil {
-		return "", err
+		return C.CString(fmt.Sprintf("ERROR: %s", err.Error()))
 	}
 
-	cmd := fmt.Sprintf("dnf install -y %s %s", strings.Join(module.ExtraFlags, " "), strings.Join(module.Packages, " "))
+	err = json.Unmarshal([]byte(C.GoString(recipeInterface)), &recipe)
+	if err != nil {
+		return C.CString(fmt.Sprintf("ERROR: %s", err.Error()))
+	}
 
-	return cmd, nil
+	extraFlags := strings.Join(module.Options.ExtraFlags, " ")
+
+	if len(module.Source.Packages) > 0 {
+		packages := strings.Join(module.Source.Packages, " ")
+		return C.CString(fmt.Sprintf("dnf install -y %s %s && dnf clean all", extraFlags, packages))
+	}
+
+	if len(module.Source.Paths) > 0 {
+		cmd := ""
+		for i, path := range module.Source.Paths {
+			instPath := filepath.Join(recipe.ParentPath, path+".inst")
+			packages := ""
+			file, err := os.Open(instPath)
+			if err != nil {
+				return C.CString(fmt.Sprintf("ERROR: %s", err.Error()))
+			}
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				packages += scanner.Text() + " "
+			}
+			if err := scanner.Err(); err != nil {
+				return C.CString(fmt.Sprintf("ERROR: %s", err.Error()))
+			}
+			cmd += fmt.Sprintf("dnf install -y %s %s", extraFlags, packages)
+			if i != len(module.Source.Paths)-1 {
+				cmd += "&& "
+			} else {
+				cmd += "&& dnf clean all"
+			}
+		}
+		return C.CString(cmd)
+	}
+
+	return C.CString("ERROR: no packages or paths specified")
 }
+
+func main() {}

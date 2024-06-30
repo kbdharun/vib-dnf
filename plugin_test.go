@@ -1,21 +1,11 @@
-// Copyright 2023 - 2023, axtlos <axtlos@disroot.org>
-// Copyright 2023 - present, K.B.Dharun Krishna <mail@kbdharun.dev>
-// SPDX-License-Identifier: GPL-3.0-ONLY
-
 package main
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/vanilla-os/vib/api"
 )
-
-type testModule struct {
-	Name       string
-	Type       string
-	ExtraFlags []string
-	Packages   []string
-}
 
 type testCases struct {
 	module   interface{}
@@ -23,16 +13,24 @@ type testCases struct {
 }
 
 var test = []testCases{
-	{testModule{"Single Package, Single Flag", "dnf", []string{"--verbose"}, []string{"bash"}}, "dnf install -y --verbose bash"},
-	{testModule{"Single Package, No Flag", "dnf", []string{""}, []string{"bash"}}, "dnf install -y  bash"},
-	{testModule{"Multiple Packages, No Flag", "dnf", []string{""}, []string{"bash", "fish"}}, "dnf install -y  bash fish"},
-	{testModule{"Multiple Packages, Multiple Flags", "dnf", []string{"--verbose", "--best"}, []string{"bash", "fish"}}, "dnf install -y --verbose --best bash fish"},
+	// Existing test cases
+	{DnfModule{Name: "Single Package, Single Flag", Type: "dnf", Options: DnfOptions{ExtraFlags: []string{"--verbose"}}, Source: api.Source{Packages: []string{"bash"}}}, "dnf install -y --verbose bash && dnf clean all"},
+	{DnfModule{Name: "Single Package, No Flag", Type: "dnf", Options: DnfOptions{ExtraFlags: []string{}}, Source: api.Source{Packages: []string{"bash"}}}, "dnf install -y  bash && dnf clean all"},
+	{DnfModule{Name: "Multiple Packages, No Flag", Type: "dnf", Options: DnfOptions{ExtraFlags: []string{}}, Source: api.Source{Packages: []string{"bash", "fish"}}}, "dnf install -y  bash fish && dnf clean all"},
+	{DnfModule{Name: "Multiple Packages, Multiple Flags", Type: "dnf", Options: DnfOptions{ExtraFlags: []string{"--verbose", "--best"}}, Source: api.Source{Packages: []string{"bash", "fish"}}}, "dnf install -y --verbose --best bash fish && dnf clean all"},
+
+	// New test case for path-based installation
+	{DnfModule{Name: "Path-based Installation", Type: "dnf", Options: DnfOptions{ExtraFlags: []string{"--assumeyes"}}, Source: api.Source{Paths: []string{"test.inst"}}}, "dnf install -y --assumeyes package1 package2 package3 && dnf clean all"},
 }
 
 func TestBuildModule(t *testing.T) {
 	for _, testCase := range test {
-		if output, _ := BuildModule(testCase.module, &api.Recipe{}); output != testCase.expected {
-			t.Errorf("Output %q not equivalent to expected %q", output, testCase.expected)
+		moduleInterface, err := json.Marshal(testCase.module)
+		if err != nil {
+			t.Errorf("Error in json %s", err.Error())
+		}
+		if output := BuildModule(convertToCString(string(moduleInterface)), convertToCString("")); convertToGoString(output) != testCase.expected {
+			t.Errorf("Output %s not equivalent to expected %s", convertToGoString(output), testCase.expected)
 		}
 	}
 }

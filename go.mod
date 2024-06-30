@@ -1,9 +1,5 @@
 module github.com/kbdharun/vib-dnf
 
+go 1.22
 
-go 1.21
-
-require (
-	github.com/mitchellh/mapstructure v1.5.0
-	github.com/vanilla-os/vib/api v0.0.0-20231203164136-c843eaca2af6
-)
+require github.com/vanilla-os/vib/api v0.0.0-20240625202136-40f243a7482b
