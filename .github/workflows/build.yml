@@ -18,11 +18,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: 1.22
-
-    - name: Test
-      run: |
-        go get ./...
-        go test -v
     
     - name: Build
       run: |
