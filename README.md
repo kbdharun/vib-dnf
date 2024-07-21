@@ -7,10 +7,10 @@ This repository contains the Vib (Vanilla Image Builder) plugin for the DNF (Dan
 It can be used in a workflow with the following syntax:
 
 ```yml
-- uses: vanilla-os/vib-gh-action@v0.7.2
+- uses: vanilla-os/vib-gh-action@v0.7.4
   with:
     recipe: 'recipe.yml'
-    plugins: 'kbdharun/vib-dnf:v0.1'
+    plugins: 'kbdharun/vib-dnf:v0.1.1'
 ```
 
 ## Building the plugin
